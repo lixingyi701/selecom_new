@@ -1,0 +1,51 @@
+# ===== 数据集 =====
+*.parquet
+*.jsonl
+data/stage1/
+data/stage2/
+data/eval/
+data/nq/train/
+data/nq/dev/
+data/nq/eval/
+
+# ===== 大模型权重（baselineModel） =====
+baselineModel/
+
+# ===== Checkpoint 模型权重 =====
+# 只忽略具体模型子目录，保留 README 和目录结构
+checkpoint/pretrainedModel/Qwen3embedding0.6B-Mistral7B-selector/
+checkpoint/pretrainedModel/Qwen3embedding0.6B-Mistral7B-generator/
+checkpoint/pretrainedModel/Qwen3embedding0.6B-Qwen2.57B-selector/
+checkpoint/pretrainedModel/Qwen3embedding0.6B-Qwen2.57B-generator/
+checkpoint/stage1/*
+checkpoint/stage2/*
+!checkpoint/stage1/.gitkeep
+!checkpoint/stage2/.gitkeep
+
+# ===== 模型文件扩展名（兜底） =====
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+
+# ===== 日志 =====
+log/**/*.log
+log/stage1/*
+log/stage2/*
+!log/stage1/.gitkeep
+!log/stage2/.gitkeep
+
+# ===== Python 缓存 =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.cache/
+
+# ===== 大型安装包 =====
+*.whl
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db

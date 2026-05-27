@@ -1,0 +1,432 @@
+POST-TRAINING DRIFT — 20 EXAMPLE CASES
+Measurement: KL at FIRST answer content token (θ1=base, θ2=Stage2-LoRA)
+◀ marks the ground-truth first content token in Top-5 lists
+====================================================================
+Global stats (N=500)
+  D_drift (mean KL) : 1.8582
+  Std               : 1.9499
+  Median            : 1.3240
+  P25 / P75         : 0.2089 / 2.7785
+  Selection         : 20 samples evenly spaced by KL rank (step=25, rank #1=highest drift)
+====================================================================
+
+════════════════════════════════════════════════════════════════════
+EXAMPLE  1 / 20   [KL rank #1 / 500,  KL = 12.0452]
+════════════════════════════════════════════════════════════════════
+Question : joined mexico and the united states to form nafta
+Answer   : Canada
+
+First content token : 'Canada'              (token_id = 35931)
+KL(θ1 ║ θ2)         : 12.0452
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Canada'            )              0.0349        0.9915
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Yes'                  0.1773      'Canada'               0.9915 ◀
+  #2      'False'                0.1219      'Can'                  0.0019  
+  #3      'Not'                  0.1075      'Canadian'             0.0015  
+  #4      'True'                 0.0694      '1'                    0.0013  
+  #5      'no'                   0.0396      'can'                  0.0010  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  2 / 20   [KL rank #26 / 500,  KL = 5.7584]
+════════════════════════════════════════════════════════════════════
+Question : what is the main use of the eiffel tower in modern times
+Answer   : visited paid monument
+
+First content token : 'visited'             (token_id = 28868)
+KL(θ1 ║ θ2)         : 5.7584
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('visited'           )              0.0001        0.0000
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Tour'                 0.3462      'radio'                0.2313  
+  #2      'Popular'              0.0602      'tele'                 0.1590  
+  #3      'As'                   0.0531      'tour'                 0.1238  
+  #4      'It'                   0.0531      'trans'                0.0751  
+  #5      'Attr'                 0.0469      'light'                0.0585  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  3 / 20   [KL rank #51 / 500,  KL = 4.7230]
+════════════════════════════════════════════════════════════════════
+Question : where do they film the ranch on netflix
+Answer   : on a sound stage in front of a live audience in Burbank, California
+
+First content token : 'on'                  (token_id = 263)
+KL(θ1 ║ θ2)         : 4.7230
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('on'                )              0.0000        0.0039
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Live'                 0.1016      'in'                   0.8490  
+  #2      'Front'                0.0954      'Los'                  0.0226  
+  #3      'Iron'                 0.0579      'the'                  0.0129  
+  #4      'Outside'              0.0544      'outside'              0.0129  
+  #5      'Fire'                 0.0544      'California'           0.0100  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  4 / 20   [KL rank #76 / 500,  KL = 3.9100]
+════════════════════════════════════════════════════════════════════
+Question : when did the united states start using the death penalty
+Answer   : the beginning
+
+First content token : 'the'                 (token_id = 1782)
+KL(θ1 ║ θ2)         : 3.9100
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('the'               )              0.0000        0.0513
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Beginning'            0.6376      '1'                    0.2954  
+  #2      '1'                    0.1255      '6'                    0.1395  
+  #3      'During'               0.0672      'anc'                  0.0846  
+  #4      'Begin'                0.0218      'Colon'                0.0582  
+  #5      'Early'                0.0193      'the'                  0.0513 ◀
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  5 / 20   [KL rank #101 / 500,  KL = 3.2212]
+════════════════════════════════════════════════════════════════════
+Question : list of local government area in benue state
+Answer   : Ado
+
+First content token : 'Ad'                  (token_id = 2589)
+KL(θ1 ║ θ2)         : 3.2212
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Ad'                )              0.0050        0.2302
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'See'                  0.1378      '1'                    0.2451  
+  #2      '2'                    0.1216      'Ad'                   0.2302 ◀
+  #3      'Ben'                  0.1073      'Gb'                   0.0960  
+  #4      '1'                    0.1073      'U'                    0.0547  
+  #5      '5'                    0.0348      'W'                    0.0228  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  6 / 20   [KL rank #126 / 500,  KL = 2.7775]
+════════════════════════════════════════════════════════════════════
+Question : what type of novel is goodbye mr chips
+Answer   : Psychological fiction
+
+First content token : 'Psych'               (token_id = 68703)
+KL(θ1 ║ θ2)         : 2.7775
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Psych'             )              0.4300        0.0198
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Nov'                  0.4872      'coming'               0.3298  
+  #2      'Psych'                0.4300 ◀    'nov'                  0.1375  
+  #3      'Histor'               0.0147      'Coming'               0.1213  
+  #4      'Bi'                   0.0061      'British'              0.0538  
+  #5      'nov'                  0.0054      'psych'                0.0475  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  7 / 20   [KL rank #151 / 500,  KL = 2.4045]
+════════════════════════════════════════════════════════════════════
+Question : who sings stop listen what's that sound
+Answer   : Buffalo Springfield
+
+First content token : 'Buff'                (token_id = 34261)
+KL(θ1 ║ θ2)         : 2.4045
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Buff'              )              0.7367        0.0364
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Buff'                 0.7367 ◀    'Neil'                 0.0529  
+  #2      'Stephen'              0.0685      'Simple'               0.0467  
+  #3      'But'                  0.0685      'De'                   0.0387  
+  #4      'What'                 0.0144      'Buff'                 0.0364 ◀
+  #5      'Bo'                   0.0119      'the'                  0.0321  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  8 / 20   [KL rank #176 / 500,  KL = 2.2217]
+════════════════════════════════════════════════════════════════════
+Question : where did the name black death come from
+Answer   : 12th-century French physician Gilles de Corbeil's On the Signs and Symptoms of D...
+
+First content token : '1'                   (token_id = 16)
+KL(θ1 ║ θ2)         : 2.2217
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('1'                 )              0.4133        0.1600
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      '1'                    0.4133 ◀    '1'                    0.1600 ◀
+  #2      'From'                 0.1342      'the'                  0.1412  
+  #3      'Mont'                 0.0339      'in'                   0.0856  
+  #4      'Al'                   0.0339      'se'                   0.0380  
+  #5      'Simon'                0.0299      'English'              0.0315  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE  9 / 20   [KL rank #201 / 500,  KL = 1.9425]
+════════════════════════════════════════════════════════════════════
+Question : in florida it is illegal to sell alcohol before 1 pm on any sunday. this is an example of
+Answer   : Blue laws in the United States
+
+First content token : 'Blue'                (token_id = 10331)
+KL(θ1 ║ θ2)         : 1.9425
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Blue'              )              0.0541        0.0338
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Pro'                  0.2009      'blue'                 0.2346  
+  #2      'state'                0.1075      'reg'                  0.0919  
+  #3      'blue'                 0.1075      'day'                  0.0811  
+  #4      'Blue'                 0.0541 ◀    'al'                   0.0632  
+  #5      'State'                0.0508      'liqu'                 0.0492  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 10 / 20   [KL rank #226 / 500,  KL = 1.6273]
+════════════════════════════════════════════════════════════════════
+Question : where did an independence movement occur because of the congress of vienna
+Answer   : Italy
+
+First content token : 'Italy'               (token_id = 70503)
+KL(θ1 ║ θ2)         : 1.6273
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Italy'             )              0.6514        0.1404
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Italy'                0.6514 ◀    'Latin'                0.2973  
+  #2      'Pol'                  0.1132      'Italy'                0.1404 ◀
+  #3      'Bel'                  0.0253      'Italian'              0.1239  
+  #4      'It'                   0.0163      'the'                  0.1239  
+  #5      'Italian'              0.0153      'Europe'               0.0517  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 11 / 20   [KL rank #251 / 500,  KL = 1.3240]
+════════════════════════════════════════════════════════════════════
+Question : is better call saul prequel to breaking bad
+Answer   : yes
+
+First content token : 'yes'                 (token_id = 9693)
+KL(θ1 ║ θ2)         : 1.3240
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('yes'               )              0.0009        0.0460
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Yes'                  0.9949      'spin'                 0.4949  
+  #2      'Correct'              0.0017      'Yes'                  0.2649  
+  #3      'True'                 0.0013      'pre'                  0.1104  
+  #4      'yes'                  0.0009 ◀    'yes'                  0.0460 ◀
+  #5      'It'                   0.0005      'Spin'                 0.0217  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 12 / 20   [KL rank #276 / 500,  KL = 1.0525]
+════════════════════════════════════════════════════════════════════
+Question : who played pink in pink floyd the wall
+Answer   : Bob Geldof
+
+First content token : 'Bob'                 (token_id = 32388)
+KL(θ1 ║ θ2)         : 1.0525
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Bob'               )              0.2104        0.1086
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Bob'                  0.2104 ◀    'David'                0.2298  
+  #2      'David'                0.1276      'Bob'                  0.1086 ◀
+  #3      'Roger'                0.1126      'Cl'                   0.0658  
+  #4      'None'                 0.0389      'Em'                   0.0619  
+  #5      'Richard'              0.0323      'Robert'               0.0546  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 13 / 20   [KL rank #301 / 500,  KL = 0.7985]
+════════════════════════════════════════════════════════════════════
+Question : when did the phantom of the opera open
+Answer   : 9 October 1986
+
+First content token : '9'                   (token_id = 24)
+KL(θ1 ║ θ2)         : 0.7985
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('9'                 )              0.8816        0.3115
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      '9'                    0.8816 ◀    '9'                    0.3115 ◀
+  #2      '1'                    0.1053      '1'                    0.2426  
+  #3      'September'            0.0059      'October'              0.1889  
+  #4      'October'              0.0022      '2'                    0.0613  
+  #5      '2'                    0.0013      '5'                    0.0613  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 14 / 20   [KL rank #326 / 500,  KL = 0.5439]
+════════════════════════════════════════════════════════════════════
+Question : when did the democratic party change its name
+Answer   : the 1830s
+
+First content token : 'the'                 (token_id = 1782)
+KL(θ1 ║ θ2)         : 0.5439
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('the'               )              0.0000        0.0061
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      '1'                    0.8683      '1'                    0.7959  
+  #2      'After'                0.0808      '2'                    0.0653  
+  #3      'Not'                  0.0124      'in'                   0.0272  
+  #4      'During'               0.0075      'December'             0.0114  
+  #5      '2'                    0.0046      'February'             0.0100  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 15 / 20   [KL rank #351 / 500,  KL = 0.3236]
+════════════════════════════════════════════════════════════════════
+Question : what does istj mean in a personality test
+Answer   : Introverted Sensing (Si)
+
+First content token : 'Intro'               (token_id = 61569)
+KL(θ1 ║ θ2)         : 0.3236
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Intro'             )              0.9701        0.7367
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Intro'                0.9701 ◀    'Intro'                0.7367 ◀
+  #2      'Int'                  0.0201      'intro'                0.1451  
+  #3      ' Intro'               0.0019      'It'                   0.0416  
+  #4      'Introduction'         0.0017      'IST'                  0.0324  
+  #5      'intro'                0.0015      ' Intro'               0.0093  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 16 / 20   [KL rank #376 / 500,  KL = 0.2033]
+════════════════════════════════════════════════════════════════════
+Question : who was the first president of the constituent assembly
+Answer   : Dr. Rajendra Prasad
+
+First content token : 'Dr'                  (token_id = 8847)
+KL(θ1 ║ θ2)         : 0.2033
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('Dr'                )              0.9955        0.8059
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'Dr'                   0.9955 ◀    'Dr'                   0.8059 ◀
+  #2      ' Dr'                  0.0008      'Ch'                   0.0130  
+  #3      'Ch'                   0.0005      'Bas'                  0.0115  
+  #4      'Mr'                   0.0004      'DR'                   0.0115  
+  #5      'DR'                   0.0003      'Ben'                  0.0062  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 17 / 20   [KL rank #401 / 500,  KL = 0.1225]
+════════════════════════════════════════════════════════════════════
+Question : how did rogue get super strength and flight
+Answer   : Rogue permanently absorbed the superhuman powers and the psyche of Carol Danvers...
+
+First content token : 'ogue'                (token_id = 27423)
+KL(θ1 ║ θ2)         : 0.1225
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('ogue'              )              0.9656        0.8911
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'ogue'                 0.9656 ◀    'ogue'                 0.8911 ◀
+  #2      'og'                   0.0166      'ou'                   0.0606  
+  #3      'ou'                   0.0015      'emy'                  0.0064  
+  #4      'oger'                 0.0011      'ough'                 0.0034  
+  #5      'ose'                  0.0011      'ah'                   0.0030  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 18 / 20   [KL rank #426 / 500,  KL = 0.0681]
+════════════════════════════════════════════════════════════════════
+Question : what is the oasis in ready player one
+Answer   : a virtual reality simulator accessible by players using visors and haptic techno...
+
+First content token : ' virtual'            (token_id = 4108)
+KL(θ1 ║ θ2)         : 0.0681
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P(' virtual'          )              0.9397        0.9197
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      ' virtual'             0.9397 ◀    ' virtual'             0.9197 ◀
+  #2      ' VR'                  0.0172      ' simulated'           0.0357  
+  #3      ' digital'             0.0104      ' massive'             0.0149  
+  #4      ' simulated'           0.0063      ' VR'                  0.0080  
+  #5      ' massive'             0.0052      ' massively'           0.0048  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 19 / 20   [KL rank #451 / 500,  KL = 0.0252]
+════════════════════════════════════════════════════════════════════
+Question : who plays grace in the secret life of the american teenager
+Answer   : Megan Park
+
+First content token : 'egan'                (token_id = 15756)
+KL(θ1 ║ θ2)         : 0.0252
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('egan'              )              0.9997        0.9739
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'egan'                 0.9997 ◀    'egan'                 0.9739 ◀
+  #2      'organ'                0.0002      'eg'                   0.0054  
+  #3      'eg'                   0.0000      'ered'                 0.0040  
+  #4      'egen'                 0.0000      'organ'                0.0031  
+  #5      'agan'                 0.0000      'agg'                  0.0018  
+────────────────────────────────────────────────────────────────────
+════════════════════════════════════════════════════════════════════
+EXAMPLE 20 / 20   [KL rank #476 / 500,  KL = 0.0050]
+════════════════════════════════════════════════════════════════════
+Question : who is the premier of northern cape 2018
+Answer   : Sylvia Lucas
+
+First content token : 'ylv'                 (token_id = 14753)
+KL(θ1 ║ θ2)         : 0.0050
+
+Probability for true token      θ1 (base)     θ2 (LoRA)
+  P('ylv'               )              0.9979        0.9920
+
+Top-5 predictions───────────────────────────────────────────────────
+  Rank    θ1 token              θ1 prob    θ2 token              θ2 prob
+  ────    ────────             ────────    ────────             ────────
+  #1      'ylv'                  0.9979 ◀    'ylv'                  0.9920 ◀
+  #2      'yl'                   0.0009      'yl'                   0.0023  
+  #3      'ylvania'              0.0006      'y'                    0.0012  
+  #4      'y'                    0.0002      'uy'                   0.0007  
+  #5      'ally'                 0.0001      'ylvania'              0.0004  
+────────────────────────────────────────────────────────────────────
