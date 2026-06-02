@@ -10,7 +10,8 @@ class Generator(nn.Module):
         self.generator_name = args.generator_name
         self.max_length = args.generator_max_length
 
-        self.generate_model = AutoModelForCausalLM.from_pretrained(self.generator_name, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+        attn_impl = getattr(args, 'attn_implementation', 'flash_attention_2')
+        self.generate_model = AutoModelForCausalLM.from_pretrained(self.generator_name, torch_dtype=torch.bfloat16, attn_implementation=attn_impl)
         self.tokenizer = AutoTokenizer.from_pretrained(args.generator_name, padding_side='left', use_fast=True, trust_remote_code=True)
         # RANK_TOKEN is an example of special tokens for future extensions
         self.tokenizer.add_tokens([SOFT_PROMPT_START, SOFT_PROMPT_TOKEN, SOFT_PROMPT_END, RANK_TOKEN], special_tokens=True)
@@ -21,6 +22,7 @@ class Generator(nn.Module):
         self.rerank_token_id = self.tokenizer.convert_tokens_to_ids(RANK_TOKEN)
 
         self.generate_model.resize_token_embeddings(len(self.tokenizer))
+        self.generate_model.config.use_cache = False  # 与 gradient checkpointing 不兼容，显式关闭
         self.embedding_layer = self.generate_model.get_input_embeddings()
 
         # Embedding layers for special token
@@ -39,13 +41,33 @@ class Generator(nn.Module):
         generator_attention_mask = generator_attention_mask.to(self.generate_model.device)
 
         input_embeds = self.embedding_layer(generator_input_ids)
-        input_embeds[generator_input_ids == self.soft_prompt_start_id] = self.soft_prompt_start_embedding_layer.weight[0]
-        input_embeds[generator_input_ids == self.soft_prompt_end_id] = self.soft_prompt_end_embedding_layer.weight[0]
-        input_embeds[generator_input_ids == self.rerank_token_id] = self.rerank_token_embedding_layer.weight[0]
 
-        input_embeds[generator_input_ids == self.soft_prompt_token_id] = embeddings
-        # 传入的 embeddings 形状是 [B * num_doc_tokens, H_gen]（在 model_combination.py:111 flatten 过），而 mask ids == soft_prompt_id 
-        # 选中的位置数也正好是 B * num_doc_tokens （每条样本恰好 num_doc_tokens 个 <SOFT_PROMPT> 占位）
+        # 用 torch.where 替换原地赋值，避免 in-place 操作在 gradient checkpointing 下破坏计算图
+        def _replace(embeds, ids, token_id, special_embed):
+            mask = (ids == token_id).unsqueeze(-1).expand_as(embeds)
+            return torch.where(mask, special_embed.expand_as(embeds), embeds)
+
+        input_embeds = _replace(input_embeds, generator_input_ids,
+                                self.soft_prompt_start_id,
+                                self.soft_prompt_start_embedding_layer.weight[0])
+        input_embeds = _replace(input_embeds, generator_input_ids,
+                                self.soft_prompt_end_id,
+                                self.soft_prompt_end_embedding_layer.weight[0])
+        input_embeds = _replace(input_embeds, generator_input_ids,
+                                self.rerank_token_id,
+                                self.rerank_token_embedding_layer.weight[0])
+
+        # 传入的 embeddings 形状是 [B * num_doc_tokens, H_gen]（在 model_combination.py 里 flatten 过）
+        # 选中的位置数也正好是 B * num_doc_tokens（每条样本恰好 num_doc_tokens 个 <SOFT_PROMPT> 占位）
+        # index_put（非原地）将 embeddings 放回对应位置，再用 torch.where 合并
+        soft_mask = (generator_input_ids == self.soft_prompt_token_id)       # [B, seq_len]
+        idx = soft_mask.nonzero(as_tuple=False)                               # [B*num_doc_tokens, 2]
+        embed_full = torch.zeros_like(input_embeds).index_put(
+            (idx[:, 0], idx[:, 1]), embeddings
+        )
+        input_embeds = torch.where(
+            soft_mask.unsqueeze(-1).expand_as(input_embeds), embed_full, input_embeds
+        )
 
         return input_embeds, generator_attention_mask
 

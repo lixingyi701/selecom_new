@@ -30,7 +30,7 @@ checkpoint/stage2/*
 *.gguf
 
 # ===== 日志 =====
-log/**/*.log
+*.log
 log/stage1/*
 log/stage2/*
 !log/stage1/.gitkeep

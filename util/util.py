@@ -13,8 +13,9 @@ import torch.nn as nn
 from tqdm import tqdm
 from typing import List
 from collections import Counter
-from vllm import LLM, SamplingParams
-from rouge_score import rouge_scorer
+# rouge_scorer and vllm are only needed in evaluation functions.
+# Lazy-imported inside each function to avoid triggering nltk/sqlite3
+# dependency chains during training.
 from transformers import AutoTokenizer
 
 
@@ -107,6 +108,7 @@ def evaluate_f1(predictions, groundtruths):
 
 
 def evaluate_rouge_l(predictions, groundtruths):
+	from rouge_score import rouge_scorer  # lazy import: avoids nltk/sqlite3 at module load
 	assert len(predictions) == len(groundtruths)
 	scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
 	total_score = 0.0
@@ -150,10 +152,11 @@ def evaluate_match(predictions, groundtruths):
 
 
 def evaluate_llm_as_a_judge(questions, predictions, groundtruths, model_name, num_gpus, max_retries=5):
+	from vllm import LLM, SamplingParams  # lazy import: only needed at eval time
 	assert len(predictions) == len(groundtruths)
 	if questions is not None:
 		assert len(questions) == len(predictions)
-	
+
 	llm = LLM(
 		model=model_name,
 		tensor_parallel_size=num_gpus,

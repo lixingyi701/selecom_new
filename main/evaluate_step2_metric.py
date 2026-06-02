@@ -1,6 +1,9 @@
 import sys
 sys.path.append('..')
 
+import os
+os.environ.setdefault('VLLM_USE_V1', '0')
+
 import argparse
 from util.util import load_jsonl, evaluate_exact_match, evaluate_f1, evaluate_llm_as_a_judge, evaluate_match
 

@@ -16,7 +16,8 @@ class Encoder(nn.Module):
 		
 		self.tokenizer = AutoTokenizer.from_pretrained(args.encoder_name, padding_side='left', use_fast=True, trust_remote_code=True)
 		self.tokenizer.add_tokens([ENCODE_TOKEN], special_tokens=True)
-		self.encoder = AutoModel.from_pretrained(args.encoder_name, torch_dtype=torch.bfloat16, attn_implementation='flash_attention_2')
+		attn_impl = getattr(args, 'attn_implementation', 'flash_attention_2')
+		self.encoder = AutoModel.from_pretrained(args.encoder_name, torch_dtype=torch.bfloat16, attn_implementation=attn_impl)
 		
 		self.encode_token_id = self.tokenizer.convert_tokens_to_ids(ENCODE_TOKEN)
 		self.encoder.resize_token_embeddings(len(self.tokenizer))
@@ -33,7 +34,11 @@ class Encoder(nn.Module):
 		# 第一步：通过主 embedding 查表（包括 ENCODE_TOKEN 对应行）
 		input_embeds = self.embedding_layer(encoder_input_ids)
 
-		input_embeds[encoder_input_ids == self.encode_token_id] = self.encode_token_embedding_layer.weight[0]
+		# 用 torch.where 替换原地赋值，避免 in-place 操作破坏 autograd 计算图
+		# （原地赋值在 gradient checkpointing + DeepSpeed 下会报 "leaf Variable in-place" 错误）
+		mask = (encoder_input_ids == self.encode_token_id).unsqueeze(-1).expand_as(input_embeds)
+		special_embed = self.encode_token_embedding_layer.weight[0].expand_as(input_embeds)
+		input_embeds = torch.where(mask, special_embed, input_embeds)
 		# Replace ENCODE token embeddings with special embedding layer
 		# 覆盖了第一步查出来的 ENCODE_TOKEN embedding，导致
 		# 反向传播时：
