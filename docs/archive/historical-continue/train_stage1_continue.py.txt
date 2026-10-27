@@ -1,0 +1,256 @@
+"""
+train_stage1_continue.py — Continue encoder training after Stage 2
+===================================================================
+Problem: After Stage 2 generator LoRA training, encoder and decoder are misaligned.
+Fix: Re-train the encoder (full fine-tuning) using Stage 1 data + Stage 1 objective
+     (selection task), while keeping Stage 2 generator LoRA frozen.
+
+Trainable: Encoder (full), Projector
+Frozen:    Generator LoRA (Stage 2), all special token embeddings
+"""
+
+import sys
+sys.path.append('..')
+
+import os
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
+import torch
+import argparse
+import random
+import warnings
+warnings.filterwarnings('ignore')
+
+from transformers import Trainer, TrainingArguments, PrinterCallback, AutoTokenizer
+from peft import PeftModel
+from util.llm_utils import FilePrinterCallback, get_select_prompt, get_encode_prompt
+from model.model_combination import MLPProjector
+from model.encoder import Encoder
+from model.generator import Generator
+from util.data import SelectTrainDataset
+from util.constant import *
+import torch.nn as nn
+from util.llm_utils import compute_trainable_parameters
+
+
+class Stage1ContinueModel(nn.Module):
+    """
+    Load Stage1 encoder + Stage2 generator LoRA.
+    Train encoder (full) + projector on Stage1 selection task.
+    Generator LoRA is frozen — we only want to re-align the encoder.
+    """
+    def __init__(self, args):
+        super().__init__()
+        self.num_emb_tokens = args.num_emb_tokens
+        self.num_doc_tokens = args.num_doc_tokens
+
+        self.encoder = Encoder(args)
+        self.generator = Generator(args)
+
+        encoder_size = self.encoder.encoder.embed_tokens.weight.shape[-1]
+        generator_size = self.generator.generate_model.config.hidden_size
+        self.projector = MLPProjector(
+            encoder_size, generator_size, args.num_emb_tokens, args.num_doc_tokens
+        ).to(torch.bfloat16)
+        self.config = self.generator.generate_model.config
+
+        # Load Stage 1 selector checkpoint (encoder base + projector + special embeddings)
+        self._load_stage1(args.stage1_checkpoint_dir)
+        # Load Stage 2 generator LoRA (frozen)
+        self.generator.generate_model = PeftModel.from_pretrained(
+            self.generator.generate_model, args.stage2_checkpoint_dir, is_trainable=False
+        )
+        print(f'[Continue] Stage2 generator LoRA loaded from {args.stage2_checkpoint_dir} (frozen)')
+
+        self._set_trainable()
+        compute_trainable_parameters(self)
+
+    def _load_stage1(self, d):
+        self.encoder.encoder.load_state_dict(torch.load(os.path.join(d, 'encoder.pt'), map_location='cpu'))
+        self.encoder.encode_token_embedding_layer.load_state_dict(torch.load(os.path.join(d, 'encode_token_embedding_layer.pt'), map_location='cpu'))
+        self.projector.load_state_dict(torch.load(os.path.join(d, 'projector.pt'), map_location='cpu'))
+        self.generator.soft_prompt_start_embedding_layer.load_state_dict(torch.load(os.path.join(d, 'soft_prompt_start_embedding_layer.pt'), map_location='cpu'))
+        self.generator.soft_prompt_end_embedding_layer.load_state_dict(torch.load(os.path.join(d, 'soft_prompt_end_embedding_layer.pt'), map_location='cpu'))
+        print(f'[Continue] Stage1 selector loaded from {d}')
+
+    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
+        gc_kwargs = gradient_checkpointing_kwargs or {}
+        for m in [self.generator.generate_model, self.encoder.encoder]:
+            if hasattr(m, 'enable_input_require_grads'):
+                m.enable_input_require_grads()
+            if hasattr(m, 'gradient_checkpointing_enable'):
+                m.gradient_checkpointing_enable(gradient_checkpointing_kwargs=gc_kwargs)
+
+    def _set_trainable(self):
+        # Encoder: fully trainable
+        for p in self.encoder.encoder.parameters():
+            p.requires_grad = True
+        for p in self.encoder.encode_token_embedding_layer.parameters():
+            p.requires_grad = False  # keep Stage1 special token embedding stable
+        # Projector: trainable
+        for p in self.projector.parameters():
+            p.requires_grad = True
+        # Generator: all frozen
+        for p in self.generator.parameters():
+            p.requires_grad = False
+        print('[Continue] Trainable: encoder (full) + projector. Frozen: generator LoRA.')
+
+    def forward(self, encoder_input_ids, encoder_attention_mask,
+                generator_input_ids, generator_attention_mask, generator_labels):
+        embeddings = self.encoder(encoder_input_ids, encoder_attention_mask)
+        B = embeddings.shape[0]
+        D = embeddings.shape[1] // self.num_emb_tokens
+        embeddings = embeddings.reshape([B, self.num_emb_tokens, D])
+        project_embeddings = self.projector(embeddings)
+        project_embeddings = project_embeddings.reshape([B * self.num_doc_tokens, -1])
+        loss = self.generator(project_embeddings, generator_input_ids, generator_attention_mask, generator_labels)
+        return {'loss': loss}
+
+    def save(self, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        def compact(state_dict):
+            return {k: v.contiguous().clone() for k, v in state_dict.items()}
+        torch.save(compact(self.encoder.encoder.state_dict()), os.path.join(output_dir, 'encoder.pt'))
+        torch.save(compact(self.encoder.encode_token_embedding_layer.state_dict()), os.path.join(output_dir, 'encode_token_embedding_layer.pt'))
+        torch.save(compact(self.projector.state_dict()), os.path.join(output_dir, 'projector.pt'))
+        torch.save(compact(self.generator.soft_prompt_start_embedding_layer.state_dict()), os.path.join(output_dir, 'soft_prompt_start_embedding_layer.pt'))
+        torch.save(compact(self.generator.soft_prompt_end_embedding_layer.state_dict()), os.path.join(output_dir, 'soft_prompt_end_embedding_layer.pt'))
+        print(f'[Continue] Saved to {output_dir}')
+
+
+class Stage1DataCollator:
+    """Same as train_stage1.py collator: selection task (single document per question)."""
+    def __init__(self, args):
+        self.args = args
+        self.encoder_tokenizer = AutoTokenizer.from_pretrained(
+            args.encoder_name, padding_side='left', use_fast=True, trust_remote_code=True
+        )
+        self.encoder_tokenizer.add_tokens([ENCODE_TOKEN], special_tokens=True)
+        self.generator_tokenizer = AutoTokenizer.from_pretrained(
+            args.generator_name, padding_side='left', use_fast=True, trust_remote_code=True
+        )
+        self.generator_tokenizer.add_tokens(
+            [SOFT_PROMPT_START, SOFT_PROMPT_TOKEN, SOFT_PROMPT_END, RANK_TOKEN], special_tokens=True
+        )
+        self.generator_tokenizer.pad_token = self.generator_tokenizer.eos_token
+
+    def __call__(self, data):
+        questions = [item['question'] for item in data]
+        documents = [[item['document']] for item in data]
+        answers   = [item['answer'] for item in data]
+
+        encode_prompts = get_encode_prompt(self.args.encoder_name, questions, documents, answers, self.args.num_emb_tokens)
+        encoder_input = self.encoder_tokenizer(
+            encode_prompts, padding=True, truncation=True,
+            max_length=self.args.encoder_max_length, return_tensors='pt'
+        )
+
+        select_prompts = get_select_prompt(self.args.generator_name, questions, answers, self.args.num_doc_tokens)
+        generator_input = self.generator_tokenizer(
+            select_prompts, max_length=self.args.generator_max_length,
+            padding=True, truncation=True, return_tensors='pt'
+        )
+        generator_labels = generator_input['input_ids'].clone()
+
+        for i, input_ids in enumerate(generator_input['input_ids']):
+            if 'Qwen' in self.args.generator_name:
+                position = (input_ids == self.generator_tokenizer.convert_tokens_to_ids("<|im_start|>")).nonzero(as_tuple=False)
+                idx = position[-1, 0] + 2 if position.numel() > 0 else 0
+            else:
+                position = (input_ids == 13).nonzero(as_tuple=False)
+                idx = None
+                for pos in position:
+                    pos = pos[0]
+                    if input_ids[pos-1] == 28793 and input_ids[pos-2] == 16289 and input_ids[pos-3] == 28748:
+                        idx = pos
+                        break
+                assert idx is not None
+            generator_labels[i, :idx + 1] = IGNORE_TOKEN_ID
+
+        return {
+            'encoder_input_ids':       encoder_input['input_ids'],
+            'encoder_attention_mask':  encoder_input['attention_mask'],
+            'generator_input_ids':     generator_input['input_ids'],
+            'generator_attention_mask':generator_input['attention_mask'],
+            'generator_labels':        generator_labels,
+        }
+
+
+class ContinueTrainer(Trainer):
+    def _save(self, output_dir=None, state_dict=None):
+        self.model.save(output_dir or self.args.output_dir)
+
+
+def train():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--encoder_name',          type=str, default='../baselineModel/Qwen3-Embedding-0.6B')
+    parser.add_argument('--generator_name',         type=str, default='../baselineModel/Qwen2.5-7B-Instruct')
+    parser.add_argument('--stage1_checkpoint_dir',  type=str, default='../checkpoint/pretrainedModel/Qwen3embedding0.6B-Qwen2.57B-selector')
+    parser.add_argument('--stage2_checkpoint_dir',  type=str, default='../checkpoint/pretrainedModel/Qwen3embedding0.6B-Qwen2.57B-generator')
+    parser.add_argument('--data_path',              type=str, default='../data/stage1/stage1_train_data.jsonl')
+    parser.add_argument('--max_samples',            type=int, default=5000)
+    parser.add_argument('--model_dir',              type=str, default='../results/stage1_continue')
+    parser.add_argument('--log_dir',                type=str, default='../results/stage1_continue/logs')
+    parser.add_argument('--log_name',               type=str, default='train_stage1_continue.log')
+    parser.add_argument('--epochs',                 type=int, default=1)
+    parser.add_argument('--learning_rate',          type=float, default=5e-6)
+    parser.add_argument('--batch_size',             type=int, default=8)
+    parser.add_argument('--gradient_accumulation_steps', type=int, default=4)
+    parser.add_argument('--encoder_max_length',     type=int, default=640)
+    parser.add_argument('--generator_max_length',   type=int, default=256)
+    parser.add_argument('--num_emb_tokens',         type=int, default=8)
+    parser.add_argument('--num_doc_tokens',         type=int, default=2)
+    parser.add_argument('--random_seed',            type=int, default=2025)
+    parser.add_argument('--logging_steps',          type=int, default=20)
+    parser.add_argument('--local_rank',             type=int, default=0)
+    args = parser.parse_args()
+
+    model = Stage1ContinueModel(args)
+
+    dataset = SelectTrainDataset(args.data_path)
+    if args.max_samples is not None and args.max_samples < len(dataset):
+        random.seed(args.random_seed)
+        indices = random.sample(range(len(dataset)), args.max_samples)
+        dataset = torch.utils.data.Subset(dataset, indices)
+        print(f'[Continue] Sampled {args.max_samples} items for probe run.')
+
+    os.makedirs(args.model_dir, exist_ok=True)
+    os.makedirs(args.log_dir, exist_ok=True)
+
+    training_args = TrainingArguments(
+        output_dir=args.model_dir,
+        do_train=True,
+        learning_rate=args.learning_rate,
+        per_device_train_batch_size=args.batch_size,
+        num_train_epochs=args.epochs,
+        seed=args.random_seed,
+        save_strategy='epoch',
+        logging_steps=args.logging_steps,
+        remove_unused_columns=False,
+        dataloader_pin_memory=True,
+        dataloader_num_workers=4,
+        gradient_accumulation_steps=args.gradient_accumulation_steps,
+        gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={'use_reentrant': False},
+        warmup_steps=50,
+        report_to='none',
+        deepspeed='dp_config.json',
+        bf16=True,
+        ddp_find_unused_parameters=False,
+    )
+
+    trainer = ContinueTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=dataset,
+        data_collator=Stage1DataCollator(args),
+    )
+    trainer.remove_callback(PrinterCallback)
+    file_cb = FilePrinterCallback(output_file=os.path.join(args.log_dir, args.log_name))
+    trainer.add_callback(file_cb)
+    trainer.train()
+
+
+if __name__ == '__main__':
+    train()

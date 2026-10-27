@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-27",
+  "base_repository_commit": "7e0f4da7871d5a70eb60a54fdfdfac0c219c9499",
+  "files": [
+    {
+      "path": "scripts/canonical_eval.py",
+      "executed_original_sha256": "0781e3c3e1e2960560d6c7c8c8e7f000c321439acbd3230607477150e57e3801",
+      "published_sha256": "5cd170022cdddced0085e5a72e31792a16a3febfae16482a951f6dcea8186255",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/controlled_train.py",
+      "executed_original_sha256": "58c7781d218b329ce0ac0aef512358889efe71f066a889a3eb9173989a0c6543",
+      "published_sha256": "9c8e9f853134920b443a91f5d73685b257a2d623135ec7d631d7c6fcede024da",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/eval_controlled.py",
+      "executed_original_sha256": "c743a9417e4ed6e1dbdd7f7e32f9f98177615b2ae0847f0d53075a005cf6c440",
+      "published_sha256": "e9b0104bf84a62e756bd21d53ef0cc05dcdc517c43bc91bbbd96fd55b34d59e5",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/generator_only_train.py",
+      "executed_original_sha256": "6a49796ea42c386e234cc1a1681897d2635e1d5ed51c84a2639c5b3e45856b00",
+      "published_sha256": "bbb89a6501d44737cd7e5e5b87c50d28637628bec2167b2c7108a894ac408358",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/eval_generator_only.py",
+      "executed_original_sha256": "a81c675332ef7dc66663b2ffc0b486271a52f40574592851af2319deef97f0af",
+      "published_sha256": "d97fd75d04c18b609f29b67d422d9deb0602fa3aa788df2c0e479b1f61835c49",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/intervention_eval.py",
+      "executed_original_sha256": "3d55b174325957853643d44d8102da412cc473f08f789f3a705c7a88664a5ca1",
+      "published_sha256": "4831cad03b151dc8de1ca832d32486b66d7241eaf25f0c08fba3841170d782d3",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/remote_audit.py",
+      "executed_original_sha256": "db82cfa44536ae012be713df09fd2d35fa66747f06319a7850e6c2975303849a",
+      "published_sha256": "aa2b86f3ad1dee28029e1e771dd8ae27439a3277f65325ff9dc863bbf85fee9a",
+      "changes": "Environment-based paths, source-relative helper identity, and audit overwrite guard; training/decoding/metric math unchanged."
+    },
+    {
+      "path": "scripts/code/model/encoder.py",
+      "executed_original_sha256": "eed50b851839bed26d0044b19e401e1b0e0934b51c8f3971bd3197ff0e289740",
+      "published_sha256": "eed50b851839bed26d0044b19e401e1b0e0934b51c8f3971bd3197ff0e289740",
+      "changes": "None; byte-identical frozen dependency."
+    },
+    {
+      "path": "scripts/code/model/generator.py",
+      "executed_original_sha256": "86264ee187ee8d3596dec36f97c03e64292410af702560d039849609803052c8",
+      "published_sha256": "86264ee187ee8d3596dec36f97c03e64292410af702560d039849609803052c8",
+      "changes": "None; byte-identical frozen dependency."
+    },
+    {
+      "path": "scripts/code/model/projector.py",
+      "executed_original_sha256": "cb77011d65d2ae998d6ec3d9599d7dc0397c248d79202c987e1407d5cc609c12",
+      "published_sha256": "cb77011d65d2ae998d6ec3d9599d7dc0397c248d79202c987e1407d5cc609c12",
+      "changes": "None; byte-identical frozen dependency."
+    },
+    {
+      "path": "scripts/code/util/constant.py",
+      "executed_original_sha256": "5bf762c86f52594be091eb9665f7fa3ecd187edc7ea7828d1c7d19c92eda338a",
+      "published_sha256": "5bf762c86f52594be091eb9665f7fa3ecd187edc7ea7828d1c7d19c92eda338a",
+      "changes": "None; byte-identical frozen dependency."
+    },
+    {
+      "path": "scripts/code/util/llm_utils.py",
+      "executed_original_sha256": "69cc20db78dd177a645af2a3e28f5953f6f29f77328c23700dc90a5f7e3958d8",
+      "published_sha256": "69cc20db78dd177a645af2a3e28f5953f6f29f77328c23700dc90a5f7e3958d8",
+      "changes": "None; byte-identical frozen dependency."
+    }
+  ],
+  "note": "Executed source hashes identify retained original runs. Published hashes identify portable copies. No new training was run to validate portability."
+}

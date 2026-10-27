@@ -1,0 +1,16 @@
+{
+  "python": "3.10",
+  "packages": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.57.6",
+    "peft": "0.18.1",
+    "flash-attn": "2.7.4.post1",
+    "numpy": "2.2.6",
+    "datasets": "4.8.4",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0"
+  },
+  "physical_gpu": 0,
+  "captured": "2026-10-27",
+  "note": "Observed environment; no credentials or machine paths included."
+}

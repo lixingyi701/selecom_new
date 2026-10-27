@@ -49,3 +49,18 @@ __pycache__/
 # ===== 系统文件 =====
 .DS_Store
 Thumbs.db
+
+
+# Research runtime artifacts and private maintenance snapshots
+/research/
+/results/*
+!/results/.gitkeep
+.vscode/
+.env
+.env.*
+!.env.example
+*.tmp
+*.incomplete
+*.arrow
+*.lock
+experiments/**/runs/

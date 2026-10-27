@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-27",
+  "completed_utc": "2026-10-27T06:29:31.512912+00:00",
+  "deleted_files": [
+    {
+      "path": "model/__pycache__/encoder.cpython-310.pyc",
+      "bytes": 1978,
+      "mtime_ns": 1779872714150125010,
+      "nlink": 1,
+      "sha256": "4fe6641ab7f573885540bad3628b78a69a3b61846a23f5a847aa677be5675269",
+      "regenerated_from": "model/encoder.py"
+    },
+    {
+      "path": "model/__pycache__/generator.cpython-310.pyc",
+      "bytes": 3525,
+      "mtime_ns": 1779874968795802699,
+      "nlink": 1,
+      "sha256": "f9606c3b28b99b6dbb97a2cd4ecb7c85908f796321a8ffc41daa611f8390925b",
+      "regenerated_from": "model/generator.py"
+    },
+    {
+      "path": "model/__pycache__/model_combination.cpython-310.pyc",
+      "bytes": 19102,
+      "mtime_ns": 1780591237151857284,
+      "nlink": 1,
+      "sha256": "ab7cdc74660f5cfe8d97d455f99f60f53dcdd76d3e460bbabc0149f2c7b77a31",
+      "regenerated_from": "model/model_combination.py"
+    },
+    {
+      "path": "model/__pycache__/projector.cpython-310.pyc",
+      "bytes": 1065,
+      "mtime_ns": 1779089531727596258,
+      "nlink": 1,
+      "sha256": "14804d60a3697da7d335d0dc796886958aa97d41f5d67ab60f5128ed04558527",
+      "regenerated_from": "model/projector.py"
+    },
+    {
+      "path": "research/repair-20261027/__pycache__/controlled_train.cpython-310.pyc",
+      "bytes": 9173,
+      "mtime_ns": 1793043651015098604,
+      "nlink": 1,
+      "sha256": "71f75fe5594dd68ab9fdf61761e9e54a53d31c4143fa4ff5a1728d146dc461e4",
+      "regenerated_from": "research/repair-20261027/controlled_train.py"
+    },
+    {
+      "path": "research/repair-20261027/__pycache__/canonical_eval.cpython-310.pyc",
+      "bytes": 12191,
+      "mtime_ns": 1793036930970387467,
+      "nlink": 1,
+      "sha256": "5bd0660ad4a84268ad0c4c781679980f14a6a6b2c34b06ff6686c56e0b0872fd",
+      "regenerated_from": "research/repair-20261027/canonical_eval.py"
+    },
+    {
+      "path": "research/repair-20261027/code/model/__pycache__/encoder.cpython-310.pyc",
+      "bytes": 2000,
+      "mtime_ns": 1793032077330274059,
+      "nlink": 1,
+      "sha256": "21a09ff3713e857af99d521fc400ac2add1bd8d827e6cebf7ad753ccada44561",
+      "regenerated_from": "research/repair-20261027/code/model/encoder.py"
+    },
+    {
+      "path": "research/repair-20261027/code/model/__pycache__/generator.cpython-310.pyc",
+      "bytes": 3547,
+      "mtime_ns": 1793032077334274048,
+      "nlink": 1,
+      "sha256": "4f897dc94723a9cd071aa3c08e1d4ba8a5761763cd8053464f8b99e406245f37",
+      "regenerated_from": "research/repair-20261027/code/model/generator.py"
+    },
+    {
+      "path": "research/repair-20261027/code/model/__pycache__/projector.cpython-310.pyc",
+      "bytes": 1087,
+      "mtime_ns": 1793032077334274048,
+      "nlink": 1,
+      "sha256": "809b04bcdea208061a892e5d4301dbf533cf74b58ac5bbd745745a87ab17e01f",
+      "regenerated_from": "research/repair-20261027/code/model/projector.py"
+    },
+    {
+      "path": "research/repair-20261027/code/util/__pycache__/constant.cpython-310.pyc",
+      "bytes": 507,
+      "mtime_ns": 1793032077330274059,
+      "nlink": 1,
+      "sha256": "bbbbee28005215625a975987d80113fdcb09f49526b909a76fb867d28fa8e70c",
+      "regenerated_from": "research/repair-20261027/code/util/constant.py"
+    },
+    {
+      "path": "research/repair-20261027/code/util/__pycache__/llm_utils.cpython-310.pyc",
+      "bytes": 4838,
+      "mtime_ns": 1793032077338274036,
+      "nlink": 1,
+      "sha256": "3996591d9138828da57a85f3671603b3ea72e6afad52f8a9e5f37c5bd24a37e0",
+      "regenerated_from": "research/repair-20261027/code/util/llm_utils.py"
+    },
+    {
+      "path": "main/__pycache__/drift_experiment_example.cpython-310.pyc",
+      "bytes": 15612,
+      "mtime_ns": 1779782860980521909,
+      "nlink": 1,
+      "sha256": "053cec1708ed3c585400b27c0fccb61380b56e0f0b5323116e0af6ea0330869c",
+      "regenerated_from": "main/drift_experiment_example.py"
+    },
+    {
+      "path": "util/__pycache__/constant.cpython-310.pyc",
+      "bytes": 494,
+      "mtime_ns": 1777272276831927004,
+      "nlink": 1,
+      "sha256": "3f1b869840a8cabd0e35993cca96d40e035fbce41720d28853ba7ffbfc464032",
+      "regenerated_from": "util/constant.py"
+    },
+    {
+      "path": "util/__pycache__/data.cpython-310.pyc",
+      "bytes": 2339,
+      "mtime_ns": 1779867242183976224,
+      "nlink": 1,
+      "sha256": "435ee97f3baf26e77a288596ea0b47b9cef319c8fb194804a2e9bc1e557ba0b2",
+      "regenerated_from": "util/data.py"
+    },
+    {
+      "path": "util/__pycache__/util.cpython-310.pyc",
+      "bytes": 8675,
+      "mtime_ns": 1780454777998291421,
+      "nlink": 1,
+      "sha256": "985d4db7c8609da4011cceece83c3806e361a3c960507d6ee252dd01fb091e63",
+      "regenerated_from": "util/util.py"
+    },
+    {
+      "path": "util/__pycache__/llm_utils.cpython-310.pyc",
+      "bytes": 4816,
+      "mtime_ns": 1780841940479598959,
+      "nlink": 1,
+      "sha256": "400f940be92591ece0a89b616de123388b47a5bd3d6130b82deb38392ced9310",
+      "regenerated_from": "util/llm_utils.py"
+    }
+  ],
+  "deleted_count": 16,
+  "deleted_logical_bytes": 90949,
+  "open_file_check": "No lsof match for exact candidate paths before deletion",
+  "protected_code_files_verified_unchanged": 42,
+  "preserved": [
+    "raw datasets and converted JSONL",
+    "valid checkpoints and optimizer states",
+    "predictions and logs",
+    "download metadata and lock files",
+    "other users files and processes"
+  ],
+  "large_training_cache_found": false,
+  "system_page_cache_cleared": false,
+  "note": "Only source-backed Python bytecode. Logical bytes differ from filesystem blocks and df changes."
+}
